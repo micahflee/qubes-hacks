@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+import subprocess, sys
+
+if __name__ == '__main__':
+    # Remove the name of the program
+    sys.argv.pop(0)
+
+    args = ['qubes-gpg-client-wrapper', '--no-tty']
+    for arg in sys.argv:
+        # Strip --utf8-strings, which dpkg-buildpackage calls when building
+        # a PPA release
+        if arg != '--utf8-strings':
+            args.append(arg)
+
+    # qubes-gpg-client can't handle --output to anything but stdout
+    filename = None
+    if '--output' in args:
+        index = args.index('--output') + 1
+        filename = args[index]
+        args[index] = '-'
+
+    #print args
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout = ''
+    for c in iter(lambda: p.stdout.read(1), ''):
+        stdout += c
+    for c in iter(lambda: p.stderr.read(1), ''):
+        sys.stderr.write(c)
+
+    # Write output to file instead of stdout, if needed
+    if filename:
+        open(filename, 'w').write(stdout)
+    else:
+        sys.stdout.write(stdout)
