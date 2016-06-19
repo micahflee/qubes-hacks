@@ -64,3 +64,24 @@ dpkg-buildpackage -S -pqubes-gpg-client-wrapper-wrapper -k927F419D7EC82C2F149C1B
 ```
 
 Note that I had to hack `qubes-gpg-client-wrapper-wrapper` to deal with `dpkg-buildpackage`'s use of GPG's `--output` flag. `qubes-gpg-client-wrapper` only lets you use `--output` if you set it to `-` (which outputs to stdout), so my wrapper checks for `--output` and if it exists, it changes it to `-` and then writes everything from the subprocess's stdout into the file it was intended to go into. And it works!
+
+# Open links in separate AppVM
+
+You might want to open links that you click on in one AppVM (in software like pidgin, thunderbird, keepassx, etc.) in a separate AppVM. You can do this in Qubes using `qvm-open-in-vm`. I've created `browser_vm.desktop`, and if you look inside you'll see the line:
+
+```
+Exec=qvm-open-in-vm browser %u
+```
+
+Edit this line to change "browser" to the name of the AppVM you'd like to open links in.
+
+Then install it in an AppVM like this:
+
+```sh
+$ mkdir ~/.local/share/applications
+$ cp browser_vm.desktop ~/.local/share/applications
+$ xdg-settings set default-web-browser browser_vm.desktop
+```
+
+Now when you open links in that VM, they'll open in the browser AppVM instead.
+
